@@ -31,7 +31,7 @@ lora_config = LoraConfig(
     lora_alpha=16,
     lora_dropout=0.1,
     bias="none",
-    task_type="QUESTION_ANS", #CAUSAL_LM
+    task_type="CAUSAL_LM",
 )
 
 # --- Argumentos para un Entrenamiento ---
@@ -54,11 +54,11 @@ training_args = TrainingArguments(
     # --- Checkpoints y Logging ---
     logging_steps=25,               # Muestra el loss cada 25 pasos.
     eval_strategy="steps",      # Evaluar el modelo cada X pasos
-    eval_steps=75,                    # Frecuencia de la evaluación
+    eval_steps=50,                    # Frecuencia de la evaluación
     save_strategy="steps",            # Guardar checkpoints según la misma frecuencia
-    save_steps=58,
+    save_steps=50,
     load_best_model_at_end=True,      # Cargar el mejor checkpoint al final del entrenamiento
-    metric_for_best_model="eval_loss",# Métrica para decidir cuál es el "mejor" modelo
+    metric_for_best_model="loss",# Métrica para decidir cuál es el "mejor" modelo
     greater_is_better=False,         # Para 'loss', un valor más bajo es mejor
 
     # --- ¡CLAVE! Desactiva gradientes durante la evaluación ---
@@ -71,7 +71,6 @@ training_args = TrainingArguments(
 
 #Tranforma el dataset del Curso de Desarrollo de Chatbots con OpenAI a uno que pueda entender el modelo de gemma
 def transformar_conversacion(ejemplo):
-    # Tu función está perfecta
     mensajes = ejemplo["messages"]
     mensajes_transformados = []
     system_prompt = ""
@@ -79,7 +78,7 @@ def transformar_conversacion(ejemplo):
         if mensaje["role"] == "system":
             system_prompt = mensaje["content"]
             break
-    for i, mensaje in mensajes:
+    for i, mensaje in enumerate(mensajes):
         if mensaje["role"] == "user":
             if system_prompt:
                 contenido_combinado = f"{system_prompt}\n\n{mensaje['content']}"

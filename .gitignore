@@ -1,7 +1,7 @@
 
 ### Training dirs###
 results-with-eval*/
-gemma-2b-it-platzibot
+gemma-2b-it-platzibot*
 data/
 verificador.py
 

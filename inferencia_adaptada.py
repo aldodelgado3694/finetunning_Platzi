@@ -19,7 +19,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 tokenizer = AutoTokenizer.from_pretrained(base_model_name)
 
-model = PeftModel.from_pretrained(base_model, adapter_path)
+model = PeftModel.from_pretrained(model, adapter_path)
 model.eval()
 
 while True:
@@ -33,7 +33,7 @@ while True:
         Necesitas responder a la siguiente pregunta: {pregunta}""" },
         ]
         prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-        inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+        inputs = tokenizer(prompt, return_tensors="pt")
 
         # --- Parametros para Generar texto con control adicional ---
         outputs = model.generate(

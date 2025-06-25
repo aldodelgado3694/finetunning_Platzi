@@ -18,6 +18,7 @@ base_model = AutoModelForCausalLM.from_pretrained(
     base_model_name,
     torch_dtype=torch.float16,
     return_dict=True,
+    low_cpu_mem_usage=True
 )
 
 # --- Aplicando adaptador LoRA ---
