@@ -1,112 +1,110 @@
-# Fine-tunning a modelo gemma en local
+# Fine-tuning a local Gemma model
 
-Hola, en este repositorio me puse a la tarea de hacer fine-tuning al modelo de gemma-2b-it como se hace en el curso de platzi [Desarrollo de Chatbots con OpenAI](https://platzi.com/cursos/openai-api-23/). Se usa SFT (Supervised Fine Tunning) para entrenar el modelo. Además, para que este proceso sea factible en hardware con memoria limitada (como una GPU de laptop en mi caso), se emplea una técnica de optimización llamada LoRA (Low-Rank Adaptation), que es una forma de PEFT (Parameter-Efficient Fine-Tuning).
+Hello, in this repository I took on the task of fine-tuning the gemma-2b-it model as it's done in the Platzi course [Desarrollo de Chatbots con OpenAI](https://platzi.com/cursos/openai-api-23/). SFT (Supervised Fine-Tuning) is used to train the model. Additionally, to make this process feasible on hardware with limited memory (like a laptop GPU in my case), an optimization technique called LoRA (Low-Rank Adaptation) is employed, which is a form of PEFT (Parameter-Efficient Fine-Tuning).
 
-Cabe resaltar que este proyecto no es usable en producción pues detecte que el dataset que proporcionan el curso esta altamente contaminado con frases en Protugues y no tiene coherencia en el formato. Ademas que se optimiza el proceso lo mas posible para poder hacerlo en una computadora con rcursos "limitados". Incluso pienso que teniende un dataset decente ( Sin contenido basura o rico en ejemplos) no podria ser entrenado en una computadora con las capacidades en las que se probo. Sin embatgo existen muchas formas poder tener poder computacional rentado como Google Colab y este codigo es un gran punto de entrada para poder especializar tu propio modelo.
+It's worth noting that this project is not production-ready, as I detected that the dataset provided in the course is highly contaminated with Portuguese phrases and lacks format consistency. Furthermore, the process is optimized as much as possible to run on a computer with "limited" resources. I even think that with a decent dataset (without junk content or rich in examples), it couldn't be trained on a computer with the specs it was tested on. However, there are many ways to rent computing power, like Google Colab, and this code is a great starting point for specializing your own model.
 
-### Objetivo 
+### Objective
 
-- Hacer el curso sin necesidad de pagar por open AI
-- Hacer pruebas un modelo en HigginFace
-- Crear tu porpio modelo modificado y hacer pruebas con el.
+- Complete the course without needing to pay for OpenAI
+- Test a model on Hugging Face
+- Create your own modified model and test it.
 
-Tambien sientete libre de usar esto para jugar con un modelo en local
+Also, feel free to use this to play with a model locally.
 
-
-## Empecemos
+## Let's get started
 
 #### Hardware
 
-Yo tengo una laptop con una RTX3050 con 6 GB de VRAM, procesador 12th Gen Intel Core i5-12450HX  2.40 GHz de 8 nucleos, 16 GB de memoria RAM.
+I have a laptop with an RTX3050 with 6 GB of VRAM, a 12th Gen Intel Core i5-12450HX 2.40 GHz 8-core processor, and 16 GB of RAM.
 
-#### Requisitos
+#### Requirements
 
-- De preferencia usar WSL2 si usas windows
-- Si usas ya Linux o en WSL instalar Conda
-- Tener instlado y actualizados los drivers de tu tarjeta grafica asi como la libreria de cuda.
-- Tener una cuenta en HuggingFace y visitar los modelos que quieras ejecutar para poder pedir el permiso de uso.
+- Preferably use WSL2 if you're on Windows
+- If you're already on Linux or in WSL, install Conda
+- Have your graphics card drivers and the CUDA library installed and updated.
+- Have a Hugging Face account and visit the models you want to run to request usage permission.
 
-### Intalación 
+### Installation
 
-### Crear y activar el entorno con Conda (Usaremos python 3.11)
+### Create and activate the Conda environment (We'll use python 3.11)
 
 ```sh
 conda create --name qlora-env python=3.11 -y
 conda activate qlora-env
-
 ```
 
-### Accede a la carpeta del proyecto
+### Access the project folder
 
 ```sh
 cd finetunning_Platzi
 ```
 
-### Instala las dependencias
+### Install the dependencies
 
 ```sh
 pip3 install -r requirements.txt
 ```
 
-### Crea un token y registralo en tu equipo 
+### Create a token and register it on your machine
 
-Para mas informacion [Huggingface CLI](https://huggingface.co/docs/huggingface_hub/en/guides/cli)
+For more information [Huggingface CLI](https://huggingface.co/docs/huggingface_hub/en/guides/cli)
 
-Para crear el token [Tokens de acceso de usuarios](https://huggingface.co/docs/hub/security-tokens)
+To create the token [User access tokens](https://huggingface.co/docs/hub/security-tokens)
 
 ```sh
-pip3 install -U "huggingface_hub[cli]" 
+pip3 install -U "huggingface_hub[cli]"
 
 huggingface-cli login
 
-#Seguir los pasos e introducir el token
+#Follow the steps and enter the token
 ```
 
-### Entendiendo el codigo y cambiando parametros
+### Understanding the code and changing parameters
 
-Te invito a ver el codigo, no esta suficientemente comentado pero creo que se explica bien que hace cada cosa.
+I invite you to look at the code. It's not heavily commented, but I believe it's self-explanatory.
 
-Lo archivos importantes son:
+The important files are:
 
-| Archivo | ¿Que hace? |
+| File | What it does? |
 |---------|------------|
-| qlora.py | Es el programa principal para el entrenamiento, es importante modificar en el parametro la carpeta de salida donde se cargara los adaptadores. [qlora.py linea 8]()|
-| inferencia_directa.py | Este programa nos sirve para poder ejecutar por ejemplo el modelo de google gemma 2 antes de el entrenamiento, solo es necesario cambiar el nombre del modelo en [inferencia_directa.py linea 6](), el modelo ahora cargado es el que ya entrene y fusione|
-| inferencia_adaptada.py | Este programa nos permite probar el modelo despues del entrenamiento y antes de la fusion, en este casi tambien es necesario modificar el parametro de la carpeta de slaida y debe ser igual que el que se configuro en el arcivo de qlora.py [inferencia_adaptada.py linea 6]()|
-| fusionar_modelo.py | Este programa es el que nos ayudara a hacer la fusion de nuestro adaptador obtenido despues del entrenamiento, al finalizar se creara la carpeta "gemma-2b-it-platzibot" la cual contendra el modelo fusionado y es el que podremos subir o exportar a donde necesitemos para usar el modelo. Tambien es necsario modificar el parametro de carpeta de salida a igual que en qlora.py en [fusionar_modelo.py linea 7]()|
+| qlora.py | This is the main program for training. It's important to modify the output directory parameter where the adapters will be loaded. [qlora.py line 8]()|
+| inferencia_directa.py | This program allows us to run, for example, the Google Gemma 2 model before training. You just need to change the model name in [inferencia_directa.py line 6](). The model currently loaded is the one I already trained and merged. |
+| inferencia_adaptada.py | This program lets us test the model after training and before merging. In this case, it's also necessary to modify the output directory parameter to be the same as the one configured in the qlora.py file. [inferencia_adaptada.py line 6]()|
+| fusionar_modelo.py | This program helps us merge our adapter obtained after training. Upon completion, the "gemma-2b-it-platzibot" folder will be created, containing the merged model, which we can then upload or export wherever we need to use it. It's also necessary to modify the output directory parameter to match the one in qlora.py at [fusionar_modelo.py line 7](). |
 
+## Starting the project
 
-## Iniciando proyecto
+With that done, we just need to execute the command in our terminal or code editor.
 
-Ya con esto solo tenemos que ejecutra el comando en nuestra terminal o editor de codigo.
+Don't forget to first modify the output directory in [qlora.py line 8]() or, if you want to change the base model, you can do so in [qlora.py line 17](). Read the code and I invite you to change parameters like "num_train_epochs" to define how many epochs to train, "per_device_train_batch_size" if you have better hardware, or help me improve the efficiency or quality of the training with parameters I haven't included or have configured incorrectly.
 
-No olvides antes modificar la carpeta de salida en [qlora.py linea 8]() o bien si quieres cambiar el modelo base lo puedes hacer en [qlora.py linea 17]()
-Lee el codigo y te invito a cambiar parametros como "num_train_epochs" para definir cuantas epocas entrenar, "per_device_train_batch_size" si es que tienes mejor hardware, o ayudame a mejorar la eficiencia o la calidad del entrenamiento con parametros que no haya incluido o este configurando mal.
-
-- Ejecuta en terminal
+- Run in terminal
 
 ```sh
 python3 qlora.py
 ```
 
-Al terminar de correr el entrenamiento, pudes probar el resultado. De igula manera si cambiastes las carpeta en qlora.py hazlo tambien en [inferencia_adaptada.py linea 6]().
+After the training finishes, you can test the result. Similarly, if you changed the directory in qlora.py, do the same in [inferencia_adaptada.py line 6]().
 
 ```sh
 python3 inferencia_adaptada.py
 ```
 
-Hasta este punto es mas que siciente si solo quieres hacer pruebas, ya viste lo que es capaz de hacer el entrenamiento, y puedes usar el codigo de inferencia_adaptada.py para crear tu propio chat. Sin embargo aun hay mas.
+Up to this point, this is more than enough if you just want to run tests. You've seen what the training is capable of, and you can use the inferencia_adaptada.py code to create your own chat. However, there's still more.
 
-Fuciona el modelo base con el adaptador para que tengas a la mano el modelo o lo puedas compartir facilmente con quien desees. No olvide modificar la carpeta de salida en [fusionar_modelo.py linea 7]().
+Merge the base model with the adapter so you have the model handy or can easily share it with whomever you wish. Don't forget to modify the output directory in [fusionar_modelo.py line 7]().
 
 ```sh
 python3 fusionar_modelo.py
 ```
 
-Ahora que ya esta listo, puedes subir tu modelo a HuggingFace y hacer uso de el con el arcgivo de "inferencia_directa.py" o tambien puedes usar este programa para probar el modelo antes o despues de entrenar tu modelo asi ver que tan capaz es el modelo base de responder a preguntas similares o probar que tan bien quedo entrenado tu modelo. Si solo quieres porbar un modelo no olvides modifcar el modleo base en [inferencia_directa.py linea 6]()
+Now that it's ready, you can upload your model to Hugging Face and use it with the "inferencia_directa.py" file. You can also use this program to test the model before or after training to see how capable the base model is of answering similar questions, or to test how well your model was trained. If you just want to test a model, don't forget to modify the base model in [inferencia_directa.py line 6]().
 
 ```sh
 python3 inferencia_directa.py
 ```
 
+# Learn and help me learn
 
+I invite you to help me detect errors or bad practices in this code. If you can run this code on a machine with lower specs, you can help by sharing your parameters. If you have any problems, I will be more than happy to help you (although for now it's difficult for me to work on this daily, I will try to make time to help you). Thank you for reading this far.
