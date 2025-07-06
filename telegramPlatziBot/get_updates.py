@@ -23,5 +23,5 @@ def print_new_messages(token):
                 offset = update["update_id"] + 1
         time.sleep(1)  # Esperar 1 segundo antes de obtener nuevas actualizaciones
 
-token = "7608755599:AAHcFb6cxpWuQg8bYghV8LIAMaB-NZQtoJI"
+token = "TELEGRAM_TOKEN"
 print_new_messages(token)
